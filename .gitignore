@@ -1,2 +1,8 @@
 .projectenv
+.artifacts
 projectenv/
+artifacts/
+.logs
+logs/
+
+notebook/catboost_info/

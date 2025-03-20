@@ -1,5 +1,5 @@
 import sys ### it controls exception handling
-import logging
+from src.logger import logging
 
 def error_message_detail(er,er_detail:sys):
     _,_,exc_tb = er_detail.exc_info() ### it returns the exception type, value and traceback at which lines
