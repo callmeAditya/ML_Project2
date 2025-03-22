@@ -4,5 +4,11 @@ projectenv/
 artifacts/
 .logs
 logs/
+logs
 
 notebook/catboost_info/
+.vercel
+catboost_info/
+__pypackages__/
+.notebook
+notebook/
