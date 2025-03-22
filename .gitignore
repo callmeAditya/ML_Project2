@@ -12,3 +12,4 @@ catboost_info/
 __pypackages__/
 .notebook
 notebook/
+notebook
