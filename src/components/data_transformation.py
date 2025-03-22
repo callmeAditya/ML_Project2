@@ -12,7 +12,6 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from src.exception import MyException
 from src.logger import logging
 
-from src.components.data_ingestion import DataIngestion
 from src.utils import save_object
 
 @dataclass ## decorators to use class variables directly without constructor
@@ -32,15 +31,15 @@ class DataTransformation:
             num_pipeline = Pipeline(
                 steps=[
                     ('imputer', SimpleImputer(strategy='median')),
-                    ('scaler', StandardScaler(with_mean=False))
+                    ('scaler', StandardScaler())
                 ]
             )
             
             cat_pipeline = Pipeline(
                 steps=[
-                    ('imputer', SimpleImputer(strategy='most_frequent')), ### taking mode
-                    ('encoder', OneHotEncoder()),
-                    ('scaler', StandardScaler(with_mean=False))
+                ("imputer",SimpleImputer(strategy="most_frequent")),
+                ("one_hot_encoder",OneHotEncoder()),
+                ("scaler",StandardScaler(with_mean=False))
                 ]
             )
             
@@ -52,7 +51,6 @@ class DataTransformation:
                     ('cat', cat_pipeline, categorical_features)
                 ]
             )
-            
             
             return preprocessor
             
@@ -77,8 +75,7 @@ class DataTransformation:
             target_test_df = test_df[target_column_name]
             
             logging.info("preprocessing object on training df and testing df")
-            
-            
+
             os.makedirs(os.path.dirname(self.data_transformation_config.preprocess_obj_path), exist_ok=True)
             pd.to_pickle(preprocessor, self.data_transformation_config.preprocess_obj_path)
             logging.info("read train and test data")
@@ -86,9 +83,12 @@ class DataTransformation:
             input_feature_train_arr = preprocessor.fit_transform(input_feature_train_df)
             input_feature_test_arr =  preprocessor.transform(input_feature_test_df)
             
-            train_arr = np.concatenate((input_feature_train_arr, target_train_df.values.reshape(-1,1)), axis=1)
-            test_arr = np.concatenate((input_feature_test_arr, target_test_df.values.reshape(-1,1)), axis=1)
-            
+            # train_arr = np.concatenate((input_feature_train_arr, target_train_df.values.reshape(-1,1)), axis=1)
+            # test_arr = np.concatenate((input_feature_test_arr, target_test_df.values.reshape(-1,1)), axis=1)
+            train_arr = np.c_[
+                input_feature_train_arr, np.array(target_train_df)
+            ]
+            test_arr = np.c_[input_feature_test_arr, np.array(target_test_df)]
             save_object(
                 self.data_transformation_config.preprocess_obj_path,
                 preprocessor
@@ -103,11 +103,4 @@ class DataTransformation:
         except Exception as e:
             logging.error("Data Transformation is failed")
             raise MyException(e, sys)
-        
-if __name__ == "__main__":
-    
-    data_inge = DataIngestion()
-    train_path, test_path = data_inge.initiate_data_ingestion()
-    
-    data_transformation = DataTransformation()
-    data_transformation.initiate_data_transformation(train_path, test_path)
+
